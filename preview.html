@@ -594,10 +594,16 @@ textarea {
 
 /* PRINT/PDF STYLES */
 @media print {
+  /* Remove all viewport/scroll clipping so content flows across pages */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
   body {
     background: #ffffff !important;
     color: #000000 !important;
     font-size: 12pt;
+    display: block !important;
   }
   header, .sidebar, .editor-panel, .toolbar, .footer, select, button, .select-container, .brand, .overlay {
     display: none !important;
@@ -606,18 +612,27 @@ textarea {
     display: block !important;
     padding: 0 !important;
     height: auto !important;
+    overflow: visible !important;
   }
   .preview-panel {
     border: none !important;
     box-shadow: none !important;
     background: transparent !important;
     height: auto !important;
+    max-height: none !important;
     overflow: visible !important;
     display: block !important;
+  }
+  .panel-head {
+    display: none !important;
   }
   .preview {
     padding: 0 !important;
     color: #000000 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
   }
   .preview pre {
     background: #f4f4f5 !important;
