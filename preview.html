@@ -1204,10 +1204,10 @@ function render() {
 
     // Escape literal markdown characters safely
     text = text
-      .replace(/\\\*/g, '__ESC_STAR__')
-      .replace(/\\#/g, '__ESC_HASH__')
-      .replace(/\\\$/g, '__ESC_DOLLAR__')
-      .replace(/\\`/g, '__ESC_BACKTICK__');
+      .replace(/\\\*/g, 'RMSX_ESC_STAR')
+      .replace(/\\#/g, 'RMSX_ESC_HASH')
+      .replace(/\\\$/g, 'RMSX_ESC_DOLLAR')
+      .replace(/\\`/g, 'RMSX_ESC_BACKTICK');
 
     // Run Parser Engine
     let finalHTML = '';
@@ -1248,10 +1248,10 @@ function render() {
 
     // Restore escaped literals
     finalHTML = finalHTML
-      .replace(/__ESC_STAR__/g, '*')
-      .replace(/__ESC_HASH__/g, '#')
-      .replace(/__ESC_DOLLAR__/g, '$')
-      .replace(/__ESC_BACKTICK__/g, '`');
+      .replace(/RMSX_ESC_STAR/g, '*')
+      .replace(/RMSX_ESC_HASH/g, '#')
+      .replace(/RMSX_ESC_DOLLAR/g, '$')
+      .replace(/RMSX_ESC_BACKTICK/g, '`');
 
     // Write to DOM
     preview.innerHTML = finalHTML;
