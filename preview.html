@@ -1202,25 +1202,41 @@ function render() {
         return `RMSX_INLINE_MATH_${inlineMath.length - 1}`;
     });
 
-    // Escape literal markdown characters safely
-    text = text
-      .replace(/\\\*/g, 'RMSX_ESC_STAR')
-      .replace(/\\#/g, 'RMSX_ESC_HASH')
-      .replace(/\\\$/g, 'RMSX_ESC_DOLLAR')
-      .replace(/\\`/g, 'RMSX_ESC_BACKTICK');
-
     // Run Parser Engine
     let finalHTML = '';
     if (onlineMode) {
         try {
+            // marked handles \* \# \` escape sequences natively — pass text as-is
             const rawHTML = marked.parse(text);
             finalHTML = DOMPurify.sanitize(rawHTML, { ADD_TAGS: ['use'] });
         } catch (e) {
             console.error('Online Markdown parsing failure, falling back.', e);
-            finalHTML = fallbackParseMarkdown(text);
+            // Apply escape placeholders only for the fallback parser
+            let fbText = text
+              .replace(/\\\*/g, 'RMSX_ESC_STAR')
+              .replace(/\\#/g, 'RMSX_ESC_HASH')
+              .replace(/\\\$/g, 'RMSX_ESC_DOLLAR')
+              .replace(/\\`/g, 'RMSX_ESC_BACKTICK');
+            finalHTML = fallbackParseMarkdown(fbText);
+            finalHTML = finalHTML
+              .replace(/RMSX_ESC_STAR/g, '*')
+              .replace(/RMSX_ESC_HASH/g, '#')
+              .replace(/RMSX_ESC_DOLLAR/g, '$')
+              .replace(/RMSX_ESC_BACKTICK/g, '`');
         }
     } else {
-        finalHTML = fallbackParseMarkdown(text);
+        // Apply escape placeholders only for the fallback parser
+        let fbText = text
+          .replace(/\\\*/g, 'RMSX_ESC_STAR')
+          .replace(/\\#/g, 'RMSX_ESC_HASH')
+          .replace(/\\\$/g, 'RMSX_ESC_DOLLAR')
+          .replace(/\\`/g, 'RMSX_ESC_BACKTICK');
+        finalHTML = fallbackParseMarkdown(fbText);
+        finalHTML = finalHTML
+          .replace(/RMSX_ESC_STAR/g, '*')
+          .replace(/RMSX_ESC_HASH/g, '#')
+          .replace(/RMSX_ESC_DOLLAR/g, '$')
+          .replace(/RMSX_ESC_BACKTICK/g, '`');
     }
 
     // Restore math tokens
@@ -1245,13 +1261,6 @@ function render() {
             return `<span class="math-inline-error">${esc(formula)}</span>`;
         }
     });
-
-    // Restore escaped literals
-    finalHTML = finalHTML
-      .replace(/RMSX_ESC_STAR/g, '*')
-      .replace(/RMSX_ESC_HASH/g, '#')
-      .replace(/RMSX_ESC_DOLLAR/g, '$')
-      .replace(/RMSX_ESC_BACKTICK/g, '`');
 
     // Write to DOM
     preview.innerHTML = finalHTML;
