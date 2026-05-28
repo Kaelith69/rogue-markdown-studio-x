@@ -427,8 +427,14 @@ textarea {
 .preview li.task-list-item {
   list-style: none;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+.preview li.task-list-item > ul,
+.preview li.task-list-item > ol {
+  flex-basis: 100%;
+  margin-left: 0;
 }
 .task-checkbox {
   width: 16px;
@@ -541,7 +547,7 @@ textarea {
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr 1fr;
-    overflow: hidden; /* Fix double-scrollbar on mobile viewports */
+    overflow-y: auto;
   }
   .app.layout-editor {
     grid-template-rows: auto 1fr 0fr;
@@ -593,11 +599,7 @@ textarea {
     color: #000000 !important;
     font-size: 12pt;
   }
-  /* Hide overlay element so it doesn't leave a dark cast on printed PDFs */
-  .overlay {
-    display: none !important;
-  }
-  header, .sidebar, .editor-panel, .toolbar, .footer, select, button, .select-container, .brand {
+  header, .sidebar, .editor-panel, .toolbar, .footer, select, button, .select-container, .brand, .overlay {
     display: none !important;
   }
   .app {
@@ -631,6 +633,41 @@ textarea {
     page-break-inside: avoid;
   }
 }
+
+/* Final production renderer fixes */
+.preview ul ul,
+.preview ul ol,
+.preview ol ul,
+.preview ol ol{
+  padding-left:1.4rem;
+  margin-top:.25rem;
+  margin-bottom:.25rem;
+}
+
+.preview li{
+  margin-bottom:.45rem;
+}
+
+.preview li > ul,
+.preview li > ol{
+  margin-top:.35rem;
+}
+
+.preview{
+  max-width:82ch;
+  padding:38px 40px 50px;
+}
+
+.preview h1{
+ border-bottom-width:1px;
+}
+
+.task-item{
+ display:flex;
+ align-items:center;
+ gap:8px;
+}
+
 </style>
 </head>
 <body>
@@ -681,17 +718,17 @@ textarea {
   <aside class="sidebar">
     <!-- File functions -->
     <div class="sidebar-section">
-      <button class="tool-btn" onclick="newDoc()" data-tooltip="New Document" aria-label="New Document">
+      <button class="tool-btn" onclick="newDoc()" data-tooltip="New Document">
         <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
       </button>
-      <label class="tool-btn" data-tooltip="Upload Markdown" aria-label="Upload Markdown" style="cursor:pointer">
+      <label class="tool-btn" data-tooltip="Upload Markdown" style="cursor:pointer">
         <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
         <input type="file" accept=".md,.txt" onchange="upload(event)">
       </label>
-      <button class="tool-btn" onclick="saveMD()" data-tooltip="Save file" aria-label="Save file">
+      <button class="tool-btn" onclick="saveMD()" data-tooltip="Save file">
         <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
       </button>
-      <button class="tool-btn" onclick="exportPDF()" data-tooltip="Export PDF" aria-label="Export PDF">
+      <button class="tool-btn" onclick="exportPDF()" data-tooltip="Export PDF">
         <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
       </button>
     </div>
@@ -700,24 +737,24 @@ textarea {
 
     <!-- Inline editing tools -->
     <div class="sidebar-section">
-      <button class="tool-btn" onclick="insert('# ', '')" data-tooltip="H1 Header" aria-label="H1 Header">H1</button>
-      <button class="tool-btn" onclick="insert('## ', '')" data-tooltip="H2 Header" aria-label="H2 Header">H2</button>
-      <button class="tool-btn" onclick="insert('### ', '')" data-tooltip="H3 Header" aria-label="H3 Header">H3</button>
-      <button class="tool-btn" onclick="insert('**', '**')" data-tooltip="Bold Text" aria-label="Bold Text">B</button>
-      <button class="tool-btn" onclick="insert('*', '*')" data-tooltip="Italic Text" aria-label="Italic Text">I</button>
-      <button class="tool-btn" onclick="insert('~~', '~~')" data-tooltip="Strikethrough" aria-label="Strikethrough">S</button>
-      <button class="tool-btn" onclick="insert('`', '`')" data-tooltip="Inline Code" aria-label="Inline Code">C</button>
-      <button class="tool-btn" onclick="insert('```javascript\n', '\n```')" data-tooltip="Code Block" aria-label="Code Block">&lt;/&gt;</button>
-      <button class="tool-btn" onclick="insert('- ', '')" data-tooltip="Unordered list" aria-label="Unordered list">•</button>
-      <button class="tool-btn" onclick="insert('1. ', '')" data-tooltip="Ordered list" aria-label="Ordered list">1.</button>
-      <button class="tool-btn" onclick="insert('- [ ] ', '')" data-tooltip="Checklist" aria-label="Checklist">☑</button>
-      <button class="tool-btn" onclick="insert('> ', '')" data-tooltip="Blockquote" aria-label="Blockquote">””</button>
-      <button class="tool-btn" onclick="insert('--- \n', '')" data-tooltip="Horizontal Line" aria-label="Horizontal Line">―</button>
-      <button class="tool-btn" onclick="insert('[', '](https://)')" data-tooltip="Add Link" aria-label="Add Link">🔗</button>
-      <button class="tool-btn" onclick="insert('![', '](https://)')" data-tooltip="Add Image" aria-label="Add Image">🖼️</button>
-      <button class="tool-btn" onclick="insert('| Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |')" data-tooltip="Insert Table" aria-label="Insert Table">田</button>
-      <button class="tool-btn" onclick="insert('$$\n', '\n$$')" data-tooltip="Math Block" aria-label="Math Block">∑</button>
-      <button class="tool-btn" onclick="insert('```mermaid\ngraph TD\n  A --> B\n```')" data-tooltip="Mermaid Diagram" aria-label="Mermaid Diagram">M</button>
+      <button class="tool-btn" onclick="insert('# ', '')" data-tooltip="H1 Header">H1</button>
+      <button class="tool-btn" onclick="insert('## ', '')" data-tooltip="H2 Header">H2</button>
+      <button class="tool-btn" onclick="insert('### ', '')" data-tooltip="H3 Header">H3</button>
+      <button class="tool-btn" onclick="insert('**', '**')" data-tooltip="Bold Text">B</button>
+      <button class="tool-btn" onclick="insert('*', '*')" data-tooltip="Italic Text">I</button>
+      <button class="tool-btn" onclick="insert('~~', '~~')" data-tooltip="Strikethrough">S</button>
+      <button class="tool-btn" onclick="insert('`', '`')" data-tooltip="Inline Code">C</button>
+      <button class="tool-btn" onclick="insert('```javascript\n', '\n```')" data-tooltip="Code Block">&lt;/&gt;</button>
+      <button class="tool-btn" onclick="insert('- ', '')" data-tooltip="Unordered list">•</button>
+      <button class="tool-btn" onclick="insert('1. ', '')" data-tooltip="Ordered list">1.</button>
+      <button class="tool-btn" onclick="insert('- [ ] ', '')" data-tooltip="Checklist">☑</button>
+      <button class="tool-btn" onclick="insert('> ', '')" data-tooltip="Blockquote">””</button>
+      <button class="tool-btn" onclick="insert('--- \n', '')" data-tooltip="Horizontal Line">―</button>
+      <button class="tool-btn" onclick="insert('[', '](https://)')" data-tooltip="Add Link">🔗</button>
+      <button class="tool-btn" onclick="insert('![', '](https://)')" data-tooltip="Add Image">🖼️</button>
+      <button class="tool-btn" onclick="insert('| Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |')" data-tooltip="Insert Table">田</button>
+      <button class="tool-btn" onclick="insert('$$\n', '\n$$')" data-tooltip="Math Block">∑</button>
+      <button class="tool-btn" onclick="insert('```mermaid\ngraph TD\n  A --> B\n```')" data-tooltip="Mermaid Diagram">M</button>
     </div>
   </aside>
 
@@ -725,10 +762,10 @@ textarea {
     <div class="panel-head">
       <span>Markdown Editor</span>
       <div class="panel-actions">
-        <button class="btn" onclick="insert('<!-- ', ' -->')" data-tooltip="Insert Comment" aria-label="Insert Comment">
+        <button class="btn" onclick="insert('<!-- ', ' -->')" data-tooltip="Insert Comment">
           Comment
         </button>
-        <button class="btn" onclick="editor.value = ''; render();" data-tooltip="Clear editor content" aria-label="Clear editor content">
+        <button class="btn" onclick="editor.value = ''; render();" data-tooltip="Clear editor content">
           Clear
         </button>
       </div>
@@ -765,7 +802,6 @@ const saveStatus = document.getElementById('saveStatus');
 let checkboxCount = 0;
 let onlineMode = false;
 let renderTimeout = null;
-let currentRenderVersion = 0; // Async race condition rendering tracker
 
 // Escaping function
 function esc(v) {
@@ -838,8 +874,16 @@ function configureLibraries() {
         renderer.listitem = function(text, task, checked) {
             if (task) {
                 const idx = checkboxCount++;
-                const cleanText = text.replace(/<input[^>]*>/g, '').trim();
-                return `<li class="task-list-item"><input type="checkbox" class="task-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}> <span>${cleanText}</span></li>`;
+                // Separate nested lists from the label text so nesting is preserved
+                let nested = '';
+                let labelText = text.replace(/<input[^>]*>/g, '');
+                // Extract trailing nested <ul>...</ul> or <ol>...</ol>
+                labelText = labelText.replace(/(<(?:ul|ol)[\s\S]*<\/(?:ul|ol)>)\s*$/i, function(m) {
+                    nested = m;
+                    return '';
+                });
+                labelText = labelText.trim();
+                return `<li class="task-list-item"><input type="checkbox" class="task-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}> <span>${labelText}</span>${nested}</li>`;
             }
             return `<li>${text}</li>`;
         };
@@ -847,13 +891,13 @@ function configureLibraries() {
         marked.use({ renderer, gfm: true, breaks: true });
     }
     
-    // Initialize Mermaid with strict security settings for production hardening
+    // Initialize Mermaid
     if (typeof mermaid !== 'undefined') {
         const theme = localStorage.getItem('rmsx-theme') || 'default';
         mermaid.initialize({
             startOnLoad: false,
             theme: theme === 'light' ? 'default' : 'dark',
-            securityLevel: 'strict'
+            securityLevel: 'loose'
         });
     }
 
@@ -873,18 +917,14 @@ function configureLibraries() {
 // Fallback Block-based Markdown Parser
 function fallbackParseMarkdown(text) {
     let escaped = esc(text);
-    
-    // Restore math placeholders to prevent them from breaking in the custom parser
-    escaped = escaped.replace(/&lt;div class=&quot;math-block-placeholder&quot; data-idx=&quot;(\d+)&quot;&gt;&lt;\/div&gt;/g, '<div class="math-block-placeholder" data-idx="$1"></div>');
-    escaped = escaped.replace(/&lt;span class=&quot;math-inline-placeholder&quot; data-idx=&quot;(\d+)&quot;&gt;&lt;\/span&gt;/g, '<span class="math-inline-placeholder" data-idx="$1"></span>');
-    
     const lines = escaped.split('\n');
     let html = [];
     let inCode = false;
     let codeContent = [];
     let codeLang = '';
     let inList = false;
-    let listType = ''; 
+    let listType = '';
+    let listDepthStack = []; // tracks nesting: [{type, indent}]
     let inTable = false;
     let tableHeaders = [];
     let tableRows = [];
@@ -902,7 +942,20 @@ function fallbackParseMarkdown(text) {
             codeContent = [];
         }
         if (inList) {
-            html.push(`</${listType}>`);
+            // Close all open nesting levels
+            while (listDepthStack.length > 0) {
+                const level = listDepthStack.pop();
+                // Close any open <li> at this level
+                if (level.liOpen) {
+                    html.push('</li>');
+                }
+                html.push(`</${level.type}>`);
+                // If there's still a parent level, close its <li> that contained this nested list
+                if (listDepthStack.length > 0 && listDepthStack[listDepthStack.length - 1].liOpen) {
+                    html.push('</li>');
+                    listDepthStack[listDepthStack.length - 1].liOpen = false;
+                }
+            }
             inList = false;
             listType = '';
         }
@@ -945,13 +998,6 @@ function fallbackParseMarkdown(text) {
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         let trimmed = line.trim();
-
-        // Pass math block placeholders directly without nesting inside <p> blocks
-        if (trimmed.startsWith('<div class="math-block-placeholder"')) {
-            closeBlocks();
-            html.push(trimmed);
-            continue;
-        }
 
         // Code block check
         if (trimmed.startsWith('```')) {
@@ -1002,40 +1048,62 @@ function fallbackParseMarkdown(text) {
             continue;
         }
 
-        // Lists (Checklist & Standard)
+        // Lists (Checklist & Standard) — with nesting support
         let listMatch = line.match(/^(\s*)([-\*\+])\s+(.*)$/);
         let orderedMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/);
 
-        if (listMatch) {
-            let itemContent = listMatch[3];
-            let taskMatch = itemContent.match(/^\[([ x])\]\s+(.*)$/i);
-            
-            if (!inList || listType !== 'ul') {
+        if (listMatch || orderedMatch) {
+            const indent = (listMatch ? listMatch[1] : orderedMatch[1]).length;
+            const currentType = listMatch ? 'ul' : 'ol';
+            const itemContent = listMatch ? listMatch[3] : orderedMatch[3];
+
+            if (!inList) {
+                // Starting a brand new list
                 closeBlocks();
                 inList = true;
-                listType = 'ul';
-                html.push('<ul>');
+                listType = currentType;
+                html.push(`<${currentType}>`);
+                listDepthStack.push({ type: currentType, indent: indent, liOpen: false });
+            } else {
+                const topLevel = listDepthStack[listDepthStack.length - 1];
+                if (indent > topLevel.indent) {
+                    // Deeper nesting: the previous <li> is still open (liOpen=true), nest inside it
+                    html.push(`<${currentType}>`);
+                    listDepthStack.push({ type: currentType, indent: indent, liOpen: false });
+                } else {
+                    // Close current item's li if open
+                    if (topLevel.liOpen) {
+                        html.push('</li>');
+                        topLevel.liOpen = false;
+                    }
+                    if (indent < topLevel.indent) {
+                        // Shallower: close nested levels until we match
+                        while (listDepthStack.length > 1 && listDepthStack[listDepthStack.length - 1].indent > indent) {
+                            const level = listDepthStack.pop();
+                            html.push(`</${level.type}>`);
+                            // Close the parent li that contained this nested list
+                            const parent = listDepthStack[listDepthStack.length - 1];
+                            if (parent.liOpen) {
+                                html.push('</li>');
+                                parent.liOpen = false;
+                            }
+                        }
+                    }
+                }
             }
 
+            // Mark that we have an open <li> at current depth
+            const currentLevel = listDepthStack[listDepthStack.length - 1];
+
+            let taskMatch = itemContent.match(/^\[([ x])\]\s+(.*)$/i);
             if (taskMatch) {
                 const idx = checkboxCount++;
                 const checked = taskMatch[1].toLowerCase() === 'x';
-                html.push(`<li class="task-list-item"><input type="checkbox" class="task-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}> <span>${parseInline(taskMatch[2])}</span></li>`);
+                html.push(`<li class="task-list-item"><input type="checkbox" class="task-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}> <span>${parseInline(taskMatch[2])}</span>`);
             } else {
-                html.push(`<li>${parseInline(itemContent)}</li>`);
+                html.push(`<li>${parseInline(itemContent)}`);
             }
-            continue;
-        }
-
-        if (orderedMatch) {
-            let itemContent = orderedMatch[3];
-            if (!inList || listType !== 'ol') {
-                closeBlocks();
-                inList = true;
-                listType = 'ol';
-                html.push('<ol>');
-            }
-            html.push(`<li>${parseInline(itemContent)}</li>`);
+            currentLevel.liOpen = true;
             continue;
         }
 
@@ -1073,27 +1141,29 @@ function fallbackParseMarkdown(text) {
 
 // Global rendering pipeline with Math & Mermaid Support
 function render() {
-    currentRenderVersion++;
-    const renderVersion = currentRenderVersion;
-    
     checkboxCount = 0; // Reset task checkbox indexing sequence
     
     let text = editor.value;
     const blockMath = [];
     const inlineMath = [];
 
-    // Preprocess Equations: Replace to avoid mangling from standard markdown syntax
-    // 1. Math block: $$ ... $$
+    // Production safe math tokenization
     text = text.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
-        blockMath.push(formula);
-        return `\n<div class="math-block-placeholder" data-idx="${blockMath.length - 1}"></div>\n`;
+        blockMath.push(formula.trim());
+        return `RMSX_BLOCK_MATH_${blockMath.length - 1}`;
     });
 
-    // 2. Math inline: $ ... $ (avoiding standard $ cash characters)
     text = text.replace(/(?<!\$)\$([^\$\n]+?)\$(?!\$)/g, (match, formula) => {
-        inlineMath.push(formula);
-        return `<span class="math-inline-placeholder" data-idx="${inlineMath.length - 1}"></span>`;
+        inlineMath.push(formula.trim());
+        return `RMSX_INLINE_MATH_${inlineMath.length - 1}`;
     });
+
+    // Escape literal markdown characters safely
+    text = text
+      .replace(/\\\*/g, '__ESC_STAR__')
+      .replace(/\\#/g, '__ESC_HASH__')
+      .replace(/\\\$/g, '__ESC_DOLLAR__')
+      .replace(/\\`/g, '__ESC_BACKTICK__');
 
     // Run Parser Engine
     let finalHTML = '';
@@ -1109,36 +1179,41 @@ function render() {
         finalHTML = fallbackParseMarkdown(text);
     }
 
-    // Restore Equations: Compile placeholder tags using KaTeX (if loaded)
-    finalHTML = finalHTML.replace(/<div class="math-block-placeholder" data-idx="(\d+)"><\/div>/g, (match, idx) => {
+    // Restore math tokens
+    finalHTML = finalHTML.replace(/RMSX_BLOCK_MATH_(\d+)/g, (match, idx) => {
         const formula = blockMath[parseInt(idx)];
-        if (typeof katex !== 'undefined') {
-            try {
-                return `<div class="math-block">${katex.renderToString(formula, { displayMode: true, throwOnError: false })}</div>`;
-            } catch (err) {
-                return `<div class="math-block-error"><strong>Math Syntax Error:</strong><pre>${esc(err.message)}</pre></div>`;
-            }
+        try {
+            return typeof katex !== 'undefined'
+                ? `<div class="math-block">${katex.renderToString(formula,{displayMode:true,throwOnError:false})}</div>`
+                : `<div class="math-block"><pre>${esc(formula)}</pre></div>`;
+        } catch (err) {
+            return `<div class="math-block-error"><pre>${esc(err.message)}</pre></div>`;
         }
-        return `<div class="math-block"><pre>$$${esc(formula)}$$</pre></div>`;
     });
 
-    finalHTML = finalHTML.replace(/<span class="math-inline-placeholder" data-idx="(\d+)"><\/span>/g, (match, idx) => {
+    finalHTML = finalHTML.replace(/RMSX_INLINE_MATH_(\d+)/g, (match, idx) => {
         const formula = inlineMath[parseInt(idx)];
-        if (typeof katex !== 'undefined') {
-            try {
-                return katex.renderToString(formula, { displayMode: false, throwOnError: false });
-            } catch (err) {
-                return `<span class="math-inline-error" title="${esc(err.message)}">$${esc(formula)}$</span>`;
-            }
+        try {
+            return typeof katex !== 'undefined'
+                ? katex.renderToString(formula,{displayMode:false,throwOnError:false})
+                : `<code>${esc(formula)}</code>`;
+        } catch (err) {
+            return `<span class="math-inline-error">${esc(formula)}</span>`;
         }
-        return `<code>$${esc(formula)}$</code>`;
     });
+
+    // Restore escaped literals
+    finalHTML = finalHTML
+      .replace(/__ESC_STAR__/g, '*')
+      .replace(/__ESC_HASH__/g, '#')
+      .replace(/__ESC_DOLLAR__/g, '$')
+      .replace(/__ESC_BACKTICK__/g, '`');
 
     // Write to DOM
     preview.innerHTML = finalHTML;
 
-    // Render Mermaid diagrams asynchronously passing current version to prevent race conditions
-    renderMermaidDiagrams(renderVersion);
+    // Render Mermaid diagrams asynchronously
+    renderMermaidDiagrams();
 
     // Auto-save local state
     localStorage.setItem('rmsx', editor.value);
@@ -1159,9 +1234,9 @@ function triggerRender() {
     updateMetrics();
 }
 
-// Mermaid Rendering Engine with Error Boundary and Race Condition Mitigation
+// Mermaid Rendering Engine with Error Boundary
 let mermaidRenderIndex = 0;
-function renderMermaidDiagrams(version) {
+function renderMermaidDiagrams() {
     if (typeof mermaid === 'undefined') return;
     
     const nodes = document.querySelectorAll('.mermaid-container[data-processed="false"]');
@@ -1173,29 +1248,22 @@ function renderMermaidDiagrams(version) {
         
         try {
             mermaid.render(id, code).then(({ svg }) => {
-                // Confirm this request matches the current active rendering state
-                if (version !== currentRenderVersion) return;
-                
                 node.innerHTML = svg;
                 node.setAttribute('data-processed', 'true');
             }).catch((err) => {
-                if (version !== currentRenderVersion) return;
-                
                 node.innerHTML = `<div class="mermaid-error"><strong>Mermaid Render Error:</strong><pre>${esc(err.message || err)}</pre></div>`;
                 node.setAttribute('data-processed', 'true');
                 const badSvg = document.getElementById(`d${id}`);
                 if (badSvg) badSvg.remove();
             });
         } catch (e) {
-            if (version !== currentRenderVersion) return;
-            
             node.innerHTML = `<div class="mermaid-error"><strong>Mermaid Exception:</strong><pre>${esc(e.message)}</pre></div>`;
             node.setAttribute('data-processed', 'true');
         }
     });
 }
 
-// Live Document Statistics Calculations & Browser Title Sync
+// Live Document Statistics Calculations
 function updateMetrics() {
     const text = editor.value;
     const charCount = text.length;
@@ -1205,11 +1273,6 @@ function updateMetrics() {
     document.getElementById('wordCount').innerText = `${wordCount} words`;
     document.getElementById('charCount').innerText = `${charCount} chars`;
     document.getElementById('readingTime').innerText = `${readingTime} min read`;
-    
-    // Dynamic Browser Tab Title updating from first Heading
-    const match = text.match(/^#\s+(.*)$/m);
-    const titleText = match ? match[1].trim() : 'Untitled Document';
-    document.title = `${titleText} - RMS X`;
 }
 
 // Smart insertions (wraps existing selected texts dynamically)
@@ -1280,18 +1343,17 @@ function upload(e) {
         overlay.style.display = 'none';
         editor.focus();
     };
-    reader.onerror = (err) => {
-        overlay.style.display = 'none';
-        alert('Failed to read file: ' + (err.target.error ? err.target.error.message : 'Unknown error'));
-    };
     reader.readAsText(file);
 }
 
 function exportPDF() {
     overlay.style.display = 'flex';
     setTimeout(() => {
-        window.print();
         overlay.style.display = 'none';
+        // Small pause after hiding overlay so browser repaints before printing
+        setTimeout(() => {
+            window.print();
+        }, 80);
     }, 400);
 }
 
@@ -1314,12 +1376,12 @@ function changeTheme(themeName) {
     }
     localStorage.setItem('rmsx-theme', themeName);
     
-    // Update Mermaid configs based on selected theme colors (hardened strict configuration)
+    // Update Mermaid configs based on selected theme colors
     if (typeof mermaid !== 'undefined') {
         mermaid.initialize({
             startOnLoad: false,
             theme: themeName === 'light' ? 'default' : 'dark',
-            securityLevel: 'strict'
+            securityLevel: 'loose'
         });
     }
     
@@ -1338,19 +1400,18 @@ function changeFont(fontName) {
     localStorage.setItem('rmsx-font', fontName);
 }
 
-// Checklist Interaction handler (Synchronizes click back to code editor accurately via list markers)
+// Checklist Interaction handler (Synchronizes click back to code editor)
 preview.addEventListener('change', (e) => {
     if (e.target && e.target.classList.contains('task-checkbox')) {
         const idx = parseInt(e.target.getAttribute('data-idx'));
         let text = editor.value;
         let count = 0;
         
-        // Exact list item task checkbox match (prevents matching [ ] in random codeblocks)
-        text = text.replace(/(^|[\r\n])(\s*(?:&gt;|>)*\s*([-\*\+]|\d+\.)\s+)\[([ x])\]/gi, (match, beforeLine, spaceAndMarker, markerType, status) => {
+        // Find corresponding task list checkbox in editor text
+        text = text.replace(/\[([ x])\]/gi, (match, status) => {
             if (count === idx) {
                 count++;
-                const newStatus = status === ' ' ? 'x' : ' ';
-                return `${beforeLine}${spaceAndMarker}[${newStatus}]`;
+                return status === ' ' ? '[x]' : '[ ]';
             }
             count++;
             return match;
@@ -1364,9 +1425,6 @@ preview.addEventListener('change', (e) => {
 // Scroll Synchronization logic
 let scrollSource = null;
 editor.addEventListener('scroll', () => {
-    const layout = localStorage.getItem('rmsx-layout') || 'split';
-    if (layout !== 'split') return; // Disable scroll sync if panels are hidden to preserve state
-    
     if (scrollSource && scrollSource !== 'editor') return;
     scrollSource = 'editor';
     
@@ -1382,9 +1440,6 @@ editor.addEventListener('scroll', () => {
 });
 
 preview.addEventListener('scroll', () => {
-    const layout = localStorage.getItem('rmsx-layout') || 'split';
-    if (layout !== 'split') return; // Disable scroll sync if panels are hidden to preserve state
-    
     if (scrollSource && scrollSource !== 'preview') return;
     scrollSource = 'preview';
     
@@ -1397,19 +1452,6 @@ preview.addEventListener('scroll', () => {
     
     clearTimeout(window.scrollTimer);
     window.scrollTimer = setTimeout(() => { scrollSource = null; }, 100);
-});
-
-// Tab key editor support
-editor.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-        e.preventDefault();
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const val = editor.value;
-        editor.value = val.substring(0, start) + '\t' + val.substring(end);
-        editor.selectionStart = editor.selectionEnd = start + 1;
-        triggerRender();
-    }
 });
 
 // Drag & Drop Handlers
@@ -1426,10 +1468,6 @@ document.addEventListener('drop', e => {
         render();
         overlay.style.display = 'none';
         editor.focus();
-    };
-    reader.onerror = (err) => {
-        overlay.style.display = 'none';
-        alert('Failed to read file: ' + (err.target.error ? err.target.error.message : 'Unknown error'));
     };
     reader.readAsText(file);
 });
@@ -1453,9 +1491,6 @@ window.addEventListener('DOMContentLoaded', () => {
     // Configure libraries and run initial render
     configureLibraries();
     render();
-    
-    // Set explicit load message status
-    saveStatus.innerText = 'Loaded';
     
     // Input listener
     editor.addEventListener('input', triggerRender);
