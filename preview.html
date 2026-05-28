@@ -875,8 +875,10 @@ function configureLibraries() {
         const renderer = new marked.Renderer();
         
         // Custom Codeblocks (Mermaid & Syntax highlighting)
-        renderer.code = function(code, infostring, escaped) {
-            const lang = (infostring || '').trim();
+        // Supports both marked v10+ (token object) and older (positional args)
+        renderer.code = function(tokenOrCode, infostring, escaped) {
+            const code   = (tokenOrCode && typeof tokenOrCode === 'object') ? (tokenOrCode.text || '') : tokenOrCode;
+            const lang   = ((tokenOrCode && typeof tokenOrCode === 'object') ? (tokenOrCode.lang || '') : (infostring || '')).trim();
             if (lang === 'mermaid') {
                 return `<div class="mermaid-container" data-processed="false"><pre class="mermaid">${esc(code)}</pre></div>`;
             }
@@ -886,21 +888,48 @@ function configureLibraries() {
         };
 
         // Custom Task lists/Checkboxes to remain interactive and mapping line indexes
-        renderer.listitem = function(text, task, checked) {
-            if (task) {
+        // Supports both marked v10+ (token object) and older (positional args)
+        renderer.listitem = function(tokenOrText, task, checked) {
+            // marked v10+: first arg is a token object
+            if (tokenOrText && typeof tokenOrText === 'object') {
+                const token = tokenOrText;
+                if (!token.task) {
+                    return false; // defer to marked's default renderer for regular items
+                }
                 const idx = checkboxCount++;
-                // Separate nested lists from the label text so nesting is preserved
+                const isChecked = !!token.checked;
+                // Use the parser to properly render the token content (not raw token.text)
+                let body = (this.parser && token.tokens)
+                    ? this.parser.parse(token.tokens, !!token.loose)
+                    : (token.text || '');
+                // Remove any auto-generated checkbox input from default rendering
+                body = body.replace(/<input[^>]*type=["']?checkbox["']?[^>]*>/gi, '');
+                // Unwrap single <p> wrapper added by loose-list parsing
+                body = body.replace(/^\s*<p>([\s\S]*?)<\/p>\s*$/, '$1');
+                // Extract trailing nested list so it sits outside the <span>
                 let nested = '';
-                let labelText = text.replace(/<input[^>]*>/g, '');
-                // Extract trailing nested <ul>...</ul> or <ol>...</ol>
-                labelText = labelText.replace(/(<(?:ul|ol)[\s\S]*<\/(?:ul|ol)>)\s*$/i, function(m) {
-                    nested = m;
-                    return '';
+                body = body.replace(/(<(?:ul|ol)[\s\S]*<\/(?:ul|ol)>)\s*$/i, function(m) {
+                    nested = m; return '';
                 });
-                labelText = labelText.trim();
-                return `<li class="task-list-item"><input type="checkbox" class="task-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}> <span>${labelText}</span>${nested}</li>`;
+                body = body.trim();
+                return `<li class="task-list-item"><input type="checkbox" class="task-checkbox" data-idx="${idx}" ${isChecked ? 'checked' : ''}> <span>${body}</span>${nested}</li>`;
             }
-            return `<li>${text}</li>`;
+
+            // older marked: positional args (text is already rendered HTML)
+            const text      = tokenOrText || '';
+            const isTask    = !!task;
+            const isChecked = !!checked;
+            if (!isTask) {
+                return `<li>${text}</li>`;
+            }
+            const idx = checkboxCount++;
+            let nested = '';
+            let labelText = text.replace(/<input[^>]*>/g, '');
+            labelText = labelText.replace(/(<(?:ul|ol)[\s\S]*<\/(?:ul|ol)>)\s*$/i, function(m) {
+                nested = m; return '';
+            });
+            labelText = labelText.trim();
+            return `<li class="task-list-item"><input type="checkbox" class="task-checkbox" data-idx="${idx}" ${isChecked ? 'checked' : ''}> <span>${labelText}</span>${nested}</li>`;
         };
 
         marked.use({ renderer, gfm: true, breaks: true });
