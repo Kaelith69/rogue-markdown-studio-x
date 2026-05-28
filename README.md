@@ -1,20 +1,30 @@
 # Rogue Markdown Studio X
 
-![Rogue Markdown Studio X Banner](banner.svg)
+<p align="center">
+  <img src="banner.svg" alt="Rogue Markdown Studio X Banner" width="100%" style="max-width: 900px; border-radius: 12px; border: 2px solid #25293d; box-shadow: 0 20px 40px rgba(0,0,0,0.5);" />
+</p>
 
-> A zero-build, single-file, offline-first Markdown Editor and Live Preview Studio. Because you shouldn't need a 300MB node_modules folder just to write some text, render a flowchart, and format some equations.
+<p align="center">
+  <strong>A premium, zero-build, single-page, offline-first Markdown Editor and Live Preview Studio.</strong><br />
+  Because you shouldn't need a 300MB node_modules folder just to write some text, render a flowchart, and format some equations.
+</p>
 
-### [⚡ Launch Live Demo](https://kaelith69.github.io/rogue-markdown-studio-x/preview.html)
+<p align="center">
+  <a href="https://kaelith69.github.io/rogue-markdown-studio-x/preview.html"><strong>⚡ Launch Live Demo</strong></a> | 
+  <a href="#system-architecture">Architecture</a> | 
+  <a href="#rendering-data-flow">Data Flow</a> | 
+  <a href="#technical-specifications">Specs</a>
+</p>
 
 ---
 
 ## What This Actually Does
 
-**Rogue Markdown Studio X (RMS X)** is an in-browser Markdown editing workspace contained entirely within a single static HTML file (`preview.html`). It provides a split-screen dashboard to write Github Flavored Markdown and see it compiled in real-time, complete with syntax highlighting, LaTeX mathematical typesetting, and Mermaid diagram visualization.
+**Rogue Markdown Studio X (RMS X)** is an in-browser Markdown editing workspace contained entirely within a single static HTML file (`preview.html`). It provides a split-screen dashboard to write Github Flavored Markdown (GFM) and compile it in real-time, complete with syntax highlighting, LaTeX mathematical typesetting, and Mermaid diagram visualization.
 
-If you have an internet connection, it dynamically hooks into lightweight CDNs to load advanced parsers (`marked.js`), sanitizers (`DOMPurify`), math systems (`KaTeX`), and flowchart engines (`Mermaid`). If you lose connection or host it locally offline, it gracefully falls back to a built-in custom line-by-line block parser so you never lose the ability to write and view your work.
+If you have an active network connection, the workspace dynamically hooks into CDNs to pull advanced parsers (`marked.js`), sanitizers (`DOMPurify`), typesetting libraries (`KaTeX`), and flowchart engines (`Mermaid`). If you lose connection or host the app locally offline, it detects the failure and gracefully degrades to a built-in custom line-by-line block parser. This guarantees that your editor stays active and readable, no matter your connectivity status.
 
-It stores your draft, layout mode, typography settings, and theme choices directly in your browser's local storage. No server, no databases, no tracking.
+All documents, layouts, typography configurations, and theme choices are stored directly in your browser's `localStorage` sandbox. No database, no tracking cookies, no server runtime.
 
 ---
 
@@ -22,7 +32,7 @@ It stores your draft, layout mode, typography settings, and theme choices direct
 
 These are the features currently implemented in the codebase:
 
-*   **Dual-Engine Pipeline:** 
+*   **Dual-Engine Parsing Pipeline:** 
     *   *Online Mode (Enhanced):* Compiles markdown using `marked.js` with full GFM compliance, sanitized via `DOMPurify` to block XSS injections.
     *   *Offline Mode (Standard):* Employs a custom block-level parser built in pure Javascript to translate headers, code blocks, lists, quotes, horizontal lines, images, and links if CDNs are unreachable.
 *   **Interactive Task Lists:** Clicking checkbox items (`- [ ]` / `- [x]`) in the visual preview window automatically updates the corresponding markdown source line inside the text editor and syncs the changes to storage.
@@ -46,7 +56,9 @@ These are the features currently implemented in the codebase:
 
 The application is architected as a clean vertical pipeline contained inside a single document. It avoids external bundlers, pre-compilers, or server runtimes.
 
-![Architecture Diagram](architecture-diagram.svg)
+<p align="center">
+  <img src="architecture-diagram.svg" alt="Architecture Diagram" width="100%" style="max-width: 800px; border-radius: 8px; border: 1px solid #25293d;" />
+</p>
 
 ### Technical Components:
 1.  **UI Component Layer:** Header controls, tool sidebars, and split panels styled using responsive CSS grid layouts and custom CSS variables.
@@ -60,7 +72,9 @@ The application is architected as a clean vertical pipeline contained inside a s
 
 Here is the exact lifecycle mapping of what happens when you type or load text:
 
-![Data Flow Diagram](data-flow-diagram.svg)
+<p align="center">
+  <img src="data-flow-diagram.svg" alt="Data Flow Diagram" width="100%" style="max-width: 800px; border-radius: 8px; border: 1px solid #25293d;" />
+</p>
 
 1.  **Tokenization:** The script extracts math blocks (`$$...$$` and `$...$`) to protect special mathematical characters from being destroyed or altered during HTML parsing.
 2.  **Compilation:** The text is parsed to HTML using either the CDN engine or the regex line compiler.
@@ -71,12 +85,97 @@ Here is the exact lifecycle mapping of what happens when you type or load text:
 
 ---
 
+## Technical Specifications
+
+### 1. Interactive Sidebar Shortcuts
+The quick-insert sidebar tools wrap selected text dynamically or insert drop-in templates at your cursor position:
+
+| Tool | Action | Insert Behavior (Selection Wrapped / Default Template) |
+| :---: | :--- | :--- |
+| **H1** | Heading 1 | `# selection` |
+| **H2** | Heading 2 | `## selection` |
+| **H3** | Heading 3 | `### selection` |
+| **B** | Bold Text | `**selection**` (defaults to `**bold**`) |
+| **I** | Italic Text | `*selection*` (defaults to `*italic*`) |
+| **S** | Strikethrough | `~~selection~~` (defaults to `~~strikethrough~~`) |
+| **C** | Inline Code | `` `selection` `` (defaults to `` `code` ``) |
+| **`</>`**| Code Block | ` ```javascript\nselection\n``` ` |
+| **•** | Unordered List| `- selection` |
+| **1.** | Ordered List | `1. selection` |
+| **☑** | Checklist Item| `- [ ] selection` |
+| **””** | Blockquote | `> selection` |
+| **―** | Horizontal Line| `--- \n` |
+| **🔗** | Insert Link | `[selection](https://)` |
+| **🖼️** | Insert Image | `![selection](https://)` |
+| **田** | Insert Table | 2x2 markdown table skeleton |
+| **∑** | Math Block | `$$\nselection\n$$` |
+| **M** | Mermaid Graph | Flowchart diagram template (`A --> B`) |
+
+---
+
+### 2. Design System & CSS Theme Variables
+RMS X features a fully reactive styling architecture using CSS Custom Properties. Developers looking to customize themes can leverage the following CSS token scheme used across the application:
+
+```css
+:root {
+  --bg: #0a0b10;
+  --panel: #11131c;
+  --panel-head: #181b28;
+  --line: #25293d;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 8px;
+}
+```
+
+The application overrides these variables dynamically based on the active body class (e.g. `body.theme-cyberpunk`):
+
+| Variable | Midnight Slate | Rogue Brutalist | Cyberpunk Neon | Earthy Forest | Solarized Light |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `--bg` | `#0a0b10` | `#080808` | `#05000a` | `#0d0f0e` | `#f8fafc` |
+| `--panel` | `#11131c` | `#121212` | `#0e021a` | `#151b18` | `#ffffff` |
+| `--panel-head`| `#181b28` | `#1c1c1c` | `#18042c` | `#1e2621` | `#f1f5f9` |
+| `--line` | `#25293d` | `#333333` | `#ff007f` | `#2f3b33` | `#cbd5e1` |
+| `--text` | `#f1f5f9` | `#ffffff` | `#f3e8ff` | `#f0fdf4` | `#0f172a` |
+| `--text-muted`| `#94a3b8` | `#a0a0a0` | `#c084fc` | `#86efac` | `#64748b` |
+| `--accent` | `#6366f1` | `#00ff66` | `#00f0ff` | `#4ade80` | `#2563eb` |
+| `--accent-hover`| `#4f46e5`| `#00e65c` | `#00d8e6` | `#22c55e` | `#1d4ed8` |
+
+---
+
+### 3. Rendering Capability Matrix (Online vs. Offline)
+When internet connectivity is lost or CDNs are blocked, the application falls back to its embedded custom compiler. Below is a breakdown of layout capabilities in each engine mode:
+
+| Feature Element | Online Mode (Enhanced Engine) | Offline Mode (Standard Fallback) |
+| :--- | :---: | :---: |
+| **Headers (H1 - H6)** | Yes (`marked.js`) | Yes (Custom line parser) |
+| **Emphasis & Striking** | Yes (`marked.js`) | Yes (Inline regex) |
+| **Links and Images** | Yes (`marked.js`) | Yes (Inline regex) |
+| **Syntax Highlighting** | Yes (`highlight.js`) | No (Unstyled code block) |
+| **LaTeX Mathematics** | Yes (`KaTeX`) | Fallback block styling |
+| **Mermaid Flowcharts** | Yes (`Mermaid.js`) | Syntax-raw code preview |
+| **Markdown Tables** | Yes (`marked.js`) | Yes (Custom block compiler) |
+| **Blockquotes** | Yes (`marked.js`) | Yes (Custom block compiler) |
+| **GFM Checklists** | Yes (`marked.js` + override) | Yes (Indented nesting lists) |
+| **Checkbox Sync Action** | Yes (Dynamic source-code toggle) | Yes (Dynamic source-code toggle) |
+
+---
+
 ## Folder Structure
 
 Behold the absolute complexity of the workspace folder layout:
 
 ```text
 .
+├── .github/
+│   └── workflows/
+│       └── static.yml         # GitHub Actions CI/CD Deployment Workflow
 ├── preview.html               # The entire application (HTML, CSS styling, Javascript logic)
 ├── README.md                  # This file
 ├── LICENSE                    # Permissive project license
@@ -85,7 +184,7 @@ Behold the absolute complexity of the workspace folder layout:
 └── data-flow-diagram.svg      # Ingestion pipeline flow diagram
 ```
 
-Yes, that is really it. No `node_modules`, no `src/`, no config files.
+Yes, that is really it. No `node_modules`, no `src/` directories, no package configs.
 
 ---
 
