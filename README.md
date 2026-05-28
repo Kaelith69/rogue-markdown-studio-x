@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kaelith69.github.io/rogue-markdown-studio-x/preview.html"><strong>⚡ Launch Live Demo</strong></a> | 
+  <a href="https://kaelith69.github.io/rogue-markdown-studio-x/"><strong>⚡ Launch Live Demo</strong></a> | 
   <a href="#system-architecture">Architecture</a> | 
   <a href="#rendering-data-flow">Data Flow</a> | 
   <a href="#technical-specifications">Specs</a>
