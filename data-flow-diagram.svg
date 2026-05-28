@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 620" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0b10"/>
+      <stop offset="100%" stop-color="#11131c"/>
+    </linearGradient>
+    
+    <!-- Step Node Gradient -->
+    <linearGradient id="stepGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+
+    <!-- Highlight Color Gradients -->
+    <linearGradient id="accentPrimary" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+
+    <linearGradient id="accentSecondary" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    
+    <linearGradient id="accentRed" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+    
+    <filter id="subtleGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="820" height="620" fill="url(#bgGrad)" stroke="#25293d" stroke-width="2" rx="12"/>
+
+  <!-- Header -->
+  <g transform="translate(30, 40)">
+    <text x="0" y="0" font-family="'Space Grotesk', system-ui, sans-serif" font-size="20" font-weight="800" fill="#f1f5f9">RMS X: RENDERING PIPELINE DATA FLOW</text>
+    <text x="0" y="20" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#94a3b8">The sequential flow from raw text buffer to sanitized, rendered interactive HTML preview.</text>
+  </g>
+
+  <!-- Flow Line Marker -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- STEP 1: USER INPUT -->
+  <g transform="translate(40, 95)">
+    <rect width="180" height="50" fill="url(#accentPrimary)" rx="8" filter="url(#subtleGlow)"/>
+    <text x="90" y="24" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">1. USER INPUT EVENT</text>
+    <text x="90" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#e0f2fe" text-anchor="middle">Typing, File Drop, or Click Task</text>
+  </g>
+
+  <!-- Flow: Step 1 -> Step 2 -->
+  <path d="M 220,120 L 265,120" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- STEP 2: THROTTLER / DEBOUNCE -->
+  <g transform="translate(275, 95)">
+    <rect width="180" height="50" fill="url(#stepGrad)" stroke="#25293d" stroke-width="1.5" rx="8"/>
+    <text x="90" y="24" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#f1f5f9" text-anchor="middle">2. 200ms DEBOUNCER</text>
+    <text x="90" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#94a3b8" text-anchor="middle">Throttles parse rate (triggerRender)</text>
+  </g>
+
+  <!-- Flow: Step 2 -> Step 3 -->
+  <path d="M 455,120 L 500,120" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- STEP 3: MATH TOKENIZER (PRE-PROCESSOR) -->
+  <g transform="translate(510, 85)">
+    <rect width="270" height="70" fill="url(#stepGrad)" stroke="#25293d" stroke-width="1.5" rx="8"/>
+    <text x="135" y="24" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#f1f5f9" text-anchor="middle">3. MATH TOKENIZATION (Pre-process)</text>
+    <text x="135" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#94a3b8" text-anchor="middle">Extracts $$block$$ and $inline$ LaTeX</text>
+    <text x="135" y="55" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="500" fill="#8b5cf6" text-anchor="middle">Replaces with RMSX_MATH_placeholder</text>
+  </g>
+
+  <!-- Flow: Step 3 -> Engine Decision (Vertical down) -->
+  <path d="M 645,155 L 645,190" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- DECISION BLOCK: ONLINE OR OFFLINE -->
+  <g transform="translate(545, 200)">
+    <polygon points="100,0 200,40 100,80 0,40" fill="#181b28" stroke="#6366f1" stroke-width="1.5"/>
+    <text x="100" y="38" font-family="'Space Grotesk', sans-serif" font-size="10" font-weight="700" fill="#f1f5f9" text-anchor="middle">Is Engine</text>
+    <text x="100" y="50" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#6366f1" text-anchor="middle">onlineMode?</text>
+  </g>
+
+  <!-- Flow Decisions -->
+  <!-- Online Yes -> Left -->
+  <path d="M 545,240 L 440,240" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="492" y="232" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="700" fill="#10b981">YES</text>
+
+  <!-- Offline No -> Down -->
+  <path d="M 645,280 L 645,335" stroke="#f43f5e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="653" y="305" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="700" fill="#f43f5e">NO (Fallback)</text>
+
+  <!-- PATH A: ONLINE RENDERING PIPELINE -->
+  <g transform="translate(110, 200)">
+    <rect width="320" height="90" fill="url(#stepGrad)" stroke="#10b981" stroke-width="1.5" rx="8"/>
+    <text x="160" y="22" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#10b981" text-anchor="middle">4a. CDN-POWERED PARSER (Enhanced)</text>
+    <text x="160" y="44" font-family="'Plus Jakarta Sans', sans-serif" font-size="9.5" font-weight="500" fill="#f1f5f9" text-anchor="middle">marked.js (GFM checklist &amp; code blocks overrides)</text>
+    <text x="160" y="58" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#94a3b8" text-anchor="middle">DOMPurify (HTML XSS Sanitization)</text>
+    <text x="160" y="72" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#94a3b8" text-anchor="middle">highlight.js (Fenced code block syntax coloring)</text>
+  </g>
+
+  <!-- PATH B: OFFLINE RENDERING PIPELINE -->
+  <g transform="translate(510, 345)">
+    <rect width="270" height="80" fill="url(#stepGrad)" stroke="#f43f5e" stroke-width="1.5" rx="8"/>
+    <text x="135" y="24" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#f43f5e" text-anchor="middle">4b. OFFLINE ENGINE (Standard)</text>
+    <text x="135" y="46" font-family="'JetBrains Mono', monospace" font-size="9.5" font-weight="700" fill="#f1f5f9" text-anchor="middle">fallbackParseMarkdown()</text>
+    <text x="135" y="64" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#94a3b8" text-anchor="middle">Custom regex &amp; block-level processor</text>
+  </g>
+
+  <!-- Flow Paths Merging to post-processing -->
+  <!-- path A down -> post-proc -->
+  <path d="M 270,290 L 270,360" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- path B left -> post-proc -->
+  <path d="M 510,385 L 430,385" stroke="#f43f5e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- STEP 5: MATH RESTORATION (KaTeX) -->
+  <g transform="translate(130, 350)">
+    <rect width="280" height="70" fill="url(#stepGrad)" stroke="#25293d" stroke-width="1.5" rx="8"/>
+    <text x="140" y="24" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#f1f5f9" text-anchor="middle">5. MATH RESTORATION &amp; COMPILATION</text>
+    <text x="140" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#94a3b8" text-anchor="middle">Substitutes RMSX_MATH_placeholder indexes</text>
+    <text x="140" y="55" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#8b5cf6" text-anchor="middle">katex.renderToString() (Online or fallback code)</text>
+  </g>
+
+  <!-- Flow: Step 5 -> Step 6 -->
+  <path d="M 270,420 L 270,455" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- STEP 6: ASYNC MERMAID RENDER -->
+  <g transform="translate(130, 465)">
+    <rect width="280" height="60" fill="url(#stepGrad)" stroke="#25293d" stroke-width="1.5" rx="8"/>
+    <text x="140" y="24" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#f1f5f9" text-anchor="middle">6. MERMAID DIAGRAM ASYNC RENDER</text>
+    <text x="140" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" font-weight="500" fill="#94a3b8" text-anchor="middle">Parses [data-processed="false"] asynchronously via</text>
+    <text x="140" y="52" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#6366f1" text-anchor="middle">mermaid.render() --&gt; Inject SVG</text>
+  </g>
+
+  <!-- Flow: Step 6 -> Step 7 (Vertical to horizontal) -->
+  <path d="M 410,495 L 485,495" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- STEP 7: UPDATE UI AND DOM -->
+  <g transform="translate(500, 455)">
+    <rect width="280" height="80" fill="url(#accentSecondary)" rx="8" filter="url(#subtleGlow)"/>
+    <text x="140" y="22" font-family="'Space Grotesk', sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">7. DOM INGESTION &amp; PERSISTENCE</text>
+    <text x="140" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#d1fae5" text-anchor="middle">Write final parsed HTML to preview window DOM</text>
+    <text x="140" y="55" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="500" fill="#d1fae5" text-anchor="middle">Recalculate metrics (word counts/reading times)</text>
+    <text x="140" y="68" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">Sync current state to localStorage</text>
+  </g>
+
+  <!-- Feedback Flow loop: Ingestion to Input (dashed line back to start) -->
+  <path d="M 640,535 L 640,580 L 130,580 L 130,145" stroke="#475569" stroke-width="1.5" stroke-dasharray="6,4" fill="none" marker-end="url(#arrow-gray)"/>
+  <text x="385" y="572" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" fill="#94a3b8" text-anchor="middle">Loops on input change or click task checklists</text>
+</svg>
